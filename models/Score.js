@@ -9,11 +9,11 @@ const scoreSchema = new Schema({
 });
 
 scoreSchema.statics.findByEmailAndGame = async (email, game) => {
-  return await Score.findOne({ email, game });
+  return await Score.find({ email, game });
 };
 
 scoreSchema.statics.findByGame = async (game) => {
-  return await Score.find({ game }).sort({ score: "descending" }).limit(20);
+  return await Score.find({ game }).sort({ score: "descending" }).limit(10);
 };
 
 const Score = mongoose.model("Score", scoreSchema);

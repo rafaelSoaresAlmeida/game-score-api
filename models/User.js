@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const roles = require("../configs/roles");
+const errorMessages = require("../messages/errorMessages")
 
 const userSchema = mongoose.Schema({
   name: {
@@ -41,11 +42,11 @@ userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new Error("Invalid login credentials");
+    throw new Error(errorMessages.INVALID_LOGIN_CREDENTIALS);
   }
   const isPasswordMatch = await bcrypt.compare(password, user.password);
   if (!isPasswordMatch) {
-    throw new Error("Invalid login credentials");
+    throw new Error(errorMessages.INVALID_LOGIN_CREDENTIALS);
   }
   return user;
 };
