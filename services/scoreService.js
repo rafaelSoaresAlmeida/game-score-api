@@ -3,37 +3,42 @@ const messages = require("../messages/messages")
 
 async function createScore(scoreReq) {
 
-  var scoresTop = await Score.findByGame(scoreReq.game);
+  var scoresTop = await Score.findTopFiveScoresByGame(scoreReq.game);
 
-    if(scoresTop.length < 10 || scoreReq.score > scoresTop[9].score ){
+    if(scoresTop.length < 5 || scoreReq.score > scoresTop[4].score ){
       scoreDb = await Score.findByEmailAndGame(scoreReq.email, scoreReq.game);
-  
+
       if (!scoreDb) {
-        await scoreReq.save();
-      } else  if (parseInt(scoreReq.score) > parseInt(scoreDb.score)) {
+          var newScore = new Score({ name: scoreReq.name, email: scoreReq.email, score: scoreReq.score , game: scoreReq.game});
+          await newScore.save();
+          return createResponse( true, messages.GET_RANK, scoreReq.email, scoreReq.game);
+      } 
+      
+      if (parseInt(scoreReq.score) > parseInt(scoreDb.score)) {
         scoreDb.score = scoreReq.score;
         await scoreDb.save();
+        return createResponse( true, messages.GET_RANK, scoreReq.email, scoreReq.game);
+      }else{
+        return createResponse( false, `${messages.EXIT_BEST_OLD_SCORE} ${scoreReq.score} !!!`);
       }
-
-      return createResponse( true, scoreReq.name, scoreReq.game);
     }else{
-      return createResponse( ranked)
+      return createResponse( false, messages.NOT_GET_RANK)
     }
   }
 
-  async function createResponse( ranked, name, game){
+  async function createResponse( ranked, msg, email, game){
     if(ranked === true) {
-      const position = await getCurrentRank(name, game);
-      return {ranked:ranked, position:position, message: messages.GET_RANK};
+      const position = await getCurrentRank(email, game);
+      return {ranked:ranked, message: `${msg} ${position} !!!`};
     }
-      return {ranked:ranked, mensage: messages.NOT_GET_RANK}; 
+      return {ranked:ranked, message: msg}; 
   }
 
-  async function getCurrentRank(name, game) {
-    var scores = await Score.findByGame(game);
+  async function getCurrentRank(email, game) {
+    var scores = await Score.findTopFiveScoresByGame(game);
     var index;
     for (index = 0; index < 9; index++) {
-      if(scores[index].name === name){
+      if(scores[index].email === email){
         break;
       }
    }
