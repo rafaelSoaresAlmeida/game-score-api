@@ -46,13 +46,8 @@ async function createScore(scoreReq) {
   }
 
 async function getScoresByGame(game) {
-  const scores = await Score.findByGame(game);
+  const scores = await Score.findTopFiveScoresByGame(game);
   return scores;
-}
-
-async function getPosition(game){
-  const scores2 = await Score.findByGameArray(game)
-  console.log(scores2);
 }
 
 module.exports = { createScore, getScoresByGame };
